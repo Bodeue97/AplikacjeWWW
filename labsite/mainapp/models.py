@@ -7,9 +7,9 @@ SHIRT_SIZES = (
         ('M', 'Medium'),
         ('L', 'Large'),
     )
-class Genders(models.IntegerChoices):
-        MALE = 1
-        FEMALE = 2
+class Genders(Enum):
+    MALE = 'Male'
+    FEMALE = 'Female'
         
 
 class ObjectToRemigrate(models.Model):
@@ -45,7 +45,7 @@ class Osoba(models.Model):
 
     imie = models.CharField(blank = False, max_length = 255)
     nazwisko = models.CharField(blank = False, max_length = 255)
-    plec = models.IntegerField(choices=Genders.choices)
+    plec = models.CharField(max_length=10, choices=[(tag, tag.value) for tag in Genders])
     stanowisko =  models.ForeignKey("Stanowisko", null=True, blank=True, on_delete=models.SET_NULL)
     data_dodania = models.DateTimeField(auto_now_add=True, editable = False)
 
