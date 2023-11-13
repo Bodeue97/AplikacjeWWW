@@ -1,24 +1,32 @@
 from rest_framework import serializers
 from .models import Osoba, Stanowisko, Genders
 
-class OsobaSerializer(serializers.Serializer):
 
-    id = serializers.IntegerField(read_only=True)
+        
 
-    imie = serializers.CharField(required=True)
+class OsobaModelSerializer(serializers.ModelSerializer):
 
-    nazwisko = serializers.CharField(required=True)
+    
+   def validate_imie(self, value):
+      if not value.isalpha():
+         raise serializers.ValidationError("Imie ma skladac sie tylko z liter.")
+      return value
+         
 
-    plec = serializers.CharField()
+   # def validate_nazwisko(self, value):
+   #    if not value.replace(" ", "").isalpha():
+   #       raise serializers.ValidationError("Nazwisko ma skladac sie tylko z liter.")
+ 
 
-    data_dodania = serializers.models.DateTimeField(auto_now_add=True, editable = False)
+   def validate_data_dodania(self, value):
+        if value > timezone.now():
+            raise serializers.ValidationError("Data dodania nie moze byc w przyszlosci")
+        return value
 
-    stanowisko = serializers.PrimaryKeyRelatedField(queryset=Stanowisko.objects.all())
-
-    def create(self, validated_data):
+   def create(self, validated_data):
         return Osoba.objects.create(**validated_data)
 
-    def update(self, instance, validated_data):
+   def update(self, instance, validated_data):
         instance.imie = validated_data.get('imie', instance.imie)
         instance.nazwisko = validated_data.get('nazwisko', instance.nazwisko)
         instance.plec = validated_data.get('plec', instance.plec)
@@ -27,13 +35,21 @@ class OsobaSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-class OsobaModelSerializer(serializers.ModelSerializer):
-     class Meta:
+   class Meta:
         model = Osoba
         fields = ['id', 'imie', 'nazwisko', 'plec', 'data_dodania', 'stanowisko']
         read_only_fields = ['id']
     
 class StanowiskoModelSerializer(serializers.ModelSerializer):
-    class Meta:
+   def create(self, validated_data):
+      return Stanowisko.objects.create(**validated_data)
+   def update(self, instance, validated_data):
+      instance.nazwa = validated_data.get('nazwa', instance.nazwa)
+      instance.opis = validated_data.get('opis', instance.opis)
+      instance.save()
+      return instance
+
+
+   class Meta:
         model = Stanowisko
         fields = ['id', 'nazwa', 'opis']

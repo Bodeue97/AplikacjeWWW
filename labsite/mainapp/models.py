@@ -7,7 +7,7 @@ SHIRT_SIZES = (
         ('M', 'Medium'),
         ('L', 'Large'),
     )
-class Genders(Enum):
+class Genders(models.TextChoices):
     MALE = 'Male'
     FEMALE = 'Female'
         
