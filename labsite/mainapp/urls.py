@@ -15,5 +15,7 @@ urlpatterns = [
     path('stanowisko/update/<int:pk>/', views.stanowisko_update),
     path('stanowisko/delete/<int:pk>/', views.stanowisko_delete),
     path('stanowisko/create/', views.stanowisko_create),
+    path('stanowisko/<int:pk>/members/', views.stanowisko_members),
+
 
 ]

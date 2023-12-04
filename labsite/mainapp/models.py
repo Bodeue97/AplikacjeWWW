@@ -48,6 +48,8 @@ class Osoba(models.Model):
     plec = models.CharField(max_length=10, choices=[(tag, tag.value) for tag in Genders])
     stanowisko =  models.ForeignKey("Stanowisko", null=True, blank=True, on_delete=models.SET_NULL)
     data_dodania = models.DateTimeField(auto_now_add=True, editable = False)
+    wlasciciel = models.ForeignKey('auth.User', related_name='Osoba', on_delete=models.CASCADE, default=2)
+
 
 
     def __str__(self):

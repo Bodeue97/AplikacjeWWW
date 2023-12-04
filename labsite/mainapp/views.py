@@ -1,9 +1,13 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Osoba, Stanowisko
 from .serializers import OsobaModelSerializer, StanowiskoModelSerializer
+from rest_framework.authentication import TokenAuthentication
+from .BearerToken.BearerTokenAuthentication import BearerTokenAuthentication
 
 # OSOBA
 @api_view(['GET'])
@@ -31,16 +35,20 @@ def osoba_get(request, pk):
 
 
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def osoba_create(request):
     serializer = OsobaModelSerializer(data = request.data)
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(wlasciciel=request.user)
         return Response(serializer.data)
     return Response(serializer.errors)
 
 
 
 @api_view(['PUT'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def osoba_update(request, pk):
      try:
          osoba = Osoby.objects.get(pk=pk)
@@ -51,15 +59,19 @@ def osoba_update(request, pk):
             serializer.save()
             return Response(serializer.data)
      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+ 
 @api_view(['DELETE'])
-def osoba_delete(pk):
+@authentication_classes([BearerTokenAuthentication]) 
+@permission_classes([IsAuthenticated])
+def osoba_delete(request, pk): 
     try:
-         osoba = Osoby.objects.get(pk=pk)
+        osoba = Osoby.objects.get(pk=pk)
     except Osoba.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
     osoba.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_204_NO_CONTENT) 
 
 #STANOWISKO
 
@@ -84,17 +96,21 @@ def stanowisko_get(request, pk):
 
 
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def stanowisko_create(request):
     serializer = StanowiskoModelSerializer(data=request.data)
 
     if serializer.is_valid():
+        # serializer.save(wlasciciel=request.user)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @api_view(['PUT'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def stanowisko_update(request, pk):
     try:
         stanowisko = Stanowisko.objects.get(pk=pk)
@@ -107,7 +123,10 @@ def stanowisko_update(request, pk):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['DELETE'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def stanowisko_delete(request, pk):
     try:
         stanowisko = Stanowisko.objects.get(pk=pk)
@@ -116,3 +135,15 @@ def stanowisko_delete(request, pk):
 
     stanowisko.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+@authentication_classes([BearerTokenAuthentication]) 
+@permission_classes([IsAuthenticated])
+def stanowisko_members(request, pk):
+    try:
+        stanowisko = Stanowisko.objects.get(pk=pk)
+        osoby = Osoba.objects.filter(stanowisko=stanowisko)
+        serializer = OsobaModelSerializer(osoby, many=True)
+        return Response(serializer.data)
+    except Stanowisko.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
