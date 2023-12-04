@@ -6,16 +6,11 @@ from .models import Osoba, Stanowisko, Genders
 
 class OsobaModelSerializer(serializers.ModelSerializer):
 
-    
    def validate_imie(self, value):
       if not value.isalpha():
          raise serializers.ValidationError("Imie ma skladac sie tylko z liter.")
       return value
-         
-
-   # def validate_nazwisko(self, value):
-   #    if not value.replace(" ", "").isalpha():
-   #       raise serializers.ValidationError("Nazwisko ma skladac sie tylko z liter.")
+      
  
 
    def validate_data_dodania(self, value):
@@ -37,8 +32,8 @@ class OsobaModelSerializer(serializers.ModelSerializer):
 
    class Meta:
         model = Osoba
-        fields = ['id', 'imie', 'nazwisko', 'plec', 'data_dodania', 'stanowisko']
-        read_only_fields = ['id']
+        fields = ['id', 'imie', 'nazwisko', 'plec', 'data_dodania', 'stanowisko', 'wlasciciel']
+        read_only_fields = ['id', 'wlasciciel.username']
     
 class StanowiskoModelSerializer(serializers.ModelSerializer):
    def create(self, validated_data):
