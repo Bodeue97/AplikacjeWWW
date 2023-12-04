@@ -8,6 +8,9 @@ from .models import Osoba, Stanowisko
 from .serializers import OsobaModelSerializer, StanowiskoModelSerializer
 from rest_framework.authentication import TokenAuthentication
 from .BearerToken.BearerTokenAuthentication import BearerTokenAuthentication
+from django.contrib.auth.decorators import permission_required
+from .custom.permissions import CanViewOsoba, CanViewOtherPersons
+
 
 # OSOBA
 @api_view(['GET'])
@@ -26,12 +29,14 @@ def osoby(request):
     
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated, CanViewOsoba, CanViewOtherPersons])
 def osoba_get(request, pk):
     try:
-        osoba = Osoby.objects.get(pk=pk)
+        osoba = Osoba.objects.get(pk=pk)
     except Osoba.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     return Response(OsobaModelSerializer(osoba).data)
+
 
 
 @api_view(['POST'])
@@ -51,7 +56,7 @@ def osoba_create(request):
 @permission_classes([IsAuthenticated])
 def osoba_update(request, pk):
      try:
-         osoba = Osoby.objects.get(pk=pk)
+         osoba = Osoba.objects.get(pk=pk)
      except Osoba.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
      serializer = OsobaModelSerializer(osoba, data=request.data)
@@ -66,7 +71,7 @@ def osoba_update(request, pk):
 @permission_classes([IsAuthenticated])
 def osoba_delete(request, pk): 
     try:
-        osoba = Osoby.objects.get(pk=pk)
+        osoba = Osoba.objects.get(pk=pk)
     except Osoba.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
